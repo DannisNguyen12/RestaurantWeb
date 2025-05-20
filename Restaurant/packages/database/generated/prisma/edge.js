@@ -86,9 +86,6 @@ Prisma.NullTypes = {
  * Enums
  */
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
-  ReadUncommitted: 'ReadUncommitted',
-  ReadCommitted: 'ReadCommitted',
-  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 });
 
@@ -158,15 +155,15 @@ exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-};
-
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
 };
 
 exports.Prisma.NullsOrder = {
@@ -237,7 +234,8 @@ const config = {
   "datasourceNames": [
     "db"
   ],
-  "activeProvider": "postgresql",
+  "activeProvider": "sqlite",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -246,8 +244,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema  \n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init  \n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n/// Represents a menu category like appetizer, main course, dessert\nmodel Category {\n  id        Int      @id @default(autoincrement())\n  name      String   @unique\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  items Item[]\n}\n\n/// Represents a dish on the menu\nmodel Item {\n  id              Int       @id @default(autoincrement())\n  name            String\n  description     String?\n  fullDescription String?\n  price           Float\n  image           String?\n  ingredients     Json // Can store array of strings or objects\n  servingTips     Json\n  recommendations Json\n  categoryId      Int?\n  category        Category? @relation(fields: [categoryId], references: [id])\n  createdAt       DateTime  @default(now())\n  updatedAt       DateTime  @updatedAt\n\n  likes      Like[]\n  orderItems OrderItem[]\n}\n\n/// Registered users who can like dishes\nmodel User {\n  id        Int      @id @default(autoincrement())\n  email     String   @unique\n  name      String?\n  password  String\n  role      UserRole @default(USER)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  likes Like[]\n}\n\n/// Track which user liked which item\nmodel Like {\n  id        Int      @id @default(autoincrement())\n  userId    Int\n  user      User     @relation(fields: [userId], references: [id])\n  itemId    Int\n  item      Item     @relation(fields: [itemId], references: [id])\n  type      LikeType\n  createdAt DateTime @default(now())\n\n  @@unique([userId, itemId]) // One like per user per item\n}\n\n/// Optional: Orders and related models\nmodel Order {\n  id           Int         @id @default(autoincrement())\n  customerName String\n  tableNumber  Int?\n  total        Float\n  status       OrderStatus @default(PENDING)\n  items        OrderItem[]\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n}\n\nmodel OrderItem {\n  id       Int   @id @default(autoincrement())\n  quantity Int\n  itemId   Int\n  item     Item  @relation(fields: [itemId], references: [id])\n  orderId  Int\n  order    Order @relation(fields: [orderId], references: [id])\n}\n\nenum UserRole {\n  USER\n  ADMIN\n}\n\nenum LikeType {\n  LIKE\n  DISLIKE\n}\n\nenum OrderStatus {\n  PENDING\n  PREPARING\n  READY\n  COMPLETED\n  CANCELLED\n}\n",
-  "inlineSchemaHash": "5de52f878cc3546f2319a3a641cde87194d1834e5be1610f3b5b0d7a5498373a",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema  \n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init  \n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\n/// Represents a menu category like appetizer, main course, dessert\nmodel Category {\n  id        Int      @id @default(autoincrement())\n  name      String   @unique\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  items Item[]\n}\n\n/// Represents a dish on the menu\nmodel Item {\n  id              Int       @id @default(autoincrement())\n  name            String\n  description     String?\n  fullDescription String?\n  price           Float\n  image           String?\n  ingredients     Json // Can store array of strings or objects\n  servingTips     Json\n  recommendations Json\n  categoryId      Int?\n  category        Category? @relation(fields: [categoryId], references: [id])\n  createdAt       DateTime  @default(now())\n  updatedAt       DateTime  @updatedAt\n\n  likes      Like[]\n  orderItems OrderItem[]\n}\n\n/// Registered users who can like dishes\nmodel User {\n  id        Int      @id @default(autoincrement())\n  email     String   @unique\n  name      String?\n  password  String\n  role      UserRole @default(USER)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  likes Like[]\n}\n\n/// Track which user liked which item\nmodel Like {\n  id        Int      @id @default(autoincrement())\n  userId    Int\n  user      User     @relation(fields: [userId], references: [id])\n  itemId    Int\n  item      Item     @relation(fields: [itemId], references: [id])\n  type      LikeType\n  createdAt DateTime @default(now())\n\n  @@unique([userId, itemId]) // One like per user per item\n}\n\n/// Optional: Orders and related models\nmodel Order {\n  id           Int         @id @default(autoincrement())\n  customerName String\n  tableNumber  Int?\n  total        Float\n  status       OrderStatus @default(PENDING)\n  items        OrderItem[]\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n}\n\nmodel OrderItem {\n  id       Int   @id @default(autoincrement())\n  quantity Int\n  itemId   Int\n  item     Item  @relation(fields: [itemId], references: [id])\n  orderId  Int\n  order    Order @relation(fields: [orderId], references: [id])\n}\n\nenum UserRole {\n  USER\n  ADMIN\n}\n\nenum LikeType {\n  LIKE\n  DISLIKE\n}\n\nenum OrderStatus {\n  PENDING\n  PREPARING\n  READY\n  COMPLETED\n  CANCELLED\n}\n",
+  "inlineSchemaHash": "0aafcfa1a270b0d6684282c3cb2263b5015d5a5b64985c0a25d11db738db5246",
   "copyEngine": true
 }
 config.dirname = '/'
